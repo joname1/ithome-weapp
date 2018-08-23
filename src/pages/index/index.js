@@ -1,6 +1,8 @@
 import Taro, { Component } from '@tarojs/taro'
 import { View, Text, Image, Swiper, SwiperItem  } from '@tarojs/components'
 import './index.scss'
+import Fly from 'flyio/dist/npm/wx'
+import x2js from 'xml-js'
 
 export default class Index extends Component {
 
@@ -16,16 +18,30 @@ export default class Index extends Component {
       interval: 5000,
       isAutoplay: true,
       isCircular: true,
-      hasIndicatorDots: true
+      hasIndicatorDots: true,
+      bannerList: []
     }
   }
 
-  componentDidMount () { }
+  componentDidMount () {
+    this.getBanner()
+  }
+
+  getBanner() {
+    let fly = new Fly
+    let url = 'https://api.ithome.com/xml/slide/slide.xml'
+    fly.get(url).then((res) => {
+      let resNormal = JSON.parse(x2js.xml2json(res.data, {compact: true, spaces: 2}));
+      this.setState({
+        bannerList : resNormal.rss.channel.item
+      });
+    })
+  }
 
   render () {
-    const { current, duration, interval, circular,isAutoplay,hasIndicatorDots } = this.state
+    const { current, duration, interval, circular,isAutoplay,hasIndicatorDots,bannerList } = this.state
     return (
-      <View>
+      <View className="container">
         <Swiper
           slideMult='10'
           indicatorColor='#999'
@@ -38,16 +54,16 @@ export default class Index extends Component {
           indicatorDots={hasIndicatorDots}
           preMargin='20'
           className="swipers">
-          <SwiperItem>
-            <Image src='http://placeimg.com/640/480/nature' mode="widthFix" style="width: 100%" />
-          </SwiperItem>
-          <SwiperItem>
-            <Image src='http://placeimg.com/640/480/arch' mode="widthFix" style="width: 100%" />
-          </SwiperItem>
-          <SwiperItem>
-            <Image src='http://placeimg.com/640/480/tech' mode="widthFix" style="width: 100%" />
-          </SwiperItem>
-
+            {
+              bannerList.map((item, index) => {
+                //console.log(index);
+                return (
+                  <SwiperItem>
+                    <Image src="{{item.image._text}}" key="{{index}}" mode="widthFix" style="width: 100%" />
+                  </SwiperItem>
+                )
+              })
+            }
         </Swiper>
       </View>
     )
