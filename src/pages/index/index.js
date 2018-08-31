@@ -19,12 +19,15 @@ export default class Index extends Component {
       isAutoplay: true,
       isCircular: true,
       hasIndicatorDots: true,
-      bannerList: []
+      bannerList: [],
+      newslist: []
     }
+    this.toDetails = this.toDetails.bind(this)
   }
 
   componentDidMount () {
     this.getBanner()
+    this.getNewList()
   }
 
   getBanner() {
@@ -38,8 +41,21 @@ export default class Index extends Component {
     })
   }
 
+  getNewList() {
+    let fly = new Fly()
+    let url = 'https://api.ithome.com/json/newslist/news?r=0'
+    fly.get(url).then((res) => {
+      this.setState({
+        newslist: res.data.newslist
+      })
+    })
+  }
+
+  toDetails() {
+    console.log(1);
+  }
   render () {
-    const { current, duration, interval, circular,isAutoplay,hasIndicatorDots,bannerList } = this.state
+    const { current, duration, interval, circular,isAutoplay,hasIndicatorDots,bannerList, newslist } = this.state
     return (
       <View className="container">
         <Swiper
@@ -65,6 +81,23 @@ export default class Index extends Component {
               })
             }
         </Swiper>
+        {
+          newslist.map((item, index) => {
+            return (
+              <div class="weui-media-box weui-media-box_text">
+              <div class="weui-media-box_appmsg" onClick={this.toDetails}>
+                  <div class="weui-media-box__hd">
+                    <Image src={item.image} class="weui-media-box__thumb" />
+                  </div>
+                  <div class="weui-media-box__bd">
+                      <div class="weui-media-box__title">{item.title}</div>
+                      <p class="weui-media-box__desc">{item.description}</p>
+                  </div>
+              </div>
+          </div>
+            )
+          })
+        }
       </View>
     )
   }
